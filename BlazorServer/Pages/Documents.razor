@@ -1,0 +1,111 @@
+﻿@page "/documents"
+
+@using BlazorServer.Data
+@inject DocumentService DocumentService
+
+<h1>Documents</h1>
+<h2>ASP.NET Core Blazor component virtualization</h2>
+
+<p>Quantity: @documents.Count() documents</p>
+
+@if (documents == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@documents" OnValidSubmit="@HandleValidSubmit">
+
+        <button class="btn btn-primary" type="submit">Submit</button><br /><br />
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order Date</th>
+                    <th>Order Number</th>
+                    <th>Type</th>
+                    <th>Supplier</th>
+                    <th>Currency</th>
+                    <th>Net</th>
+                    <th>Tax</th>
+                    <th>Gross</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Virtualize Component: https://docs.microsoft.com/en-us/aspnet/core/blazor/components/virtualization?view=aspnetcore-6.0 -->
+                <Virtualize Items="documents" Context="document">
+                    <tr>
+                        <td><InputDate @bind-Value="@document.Date" style="width:150px;" /></td>
+                        <td><InputText @bind-Value="@document.OrderNumber" style="width:120px;" /></td>
+                        <td>
+                            <InputSelect @bind-Value="@document.Type">
+                                @foreach(var type in (DocumentType[])Enum.GetValues(typeof(DocumentType)))
+                                {
+                                    <option value="@type">@type</option>
+                                }
+                            </InputSelect>
+                        </td>
+                        <td><InputText @bind-Value="@document.Supplier" style="width:120px;" /></td>
+                        <td>
+                            <InputSelect @bind-Value="@document.Currency">
+                                @foreach(var currency in (Currency[])Enum.GetValues(typeof(Currency)))
+                                {
+                                    <option value="@currency">@currency</option>
+                                }
+                            </InputSelect>
+                        </td>
+                        <td><InputNumber @bind-Value="@document.Net" style="width:120px;" /></td>
+                        <td><InputNumber @bind-Value="@document.Tax" style="width:120px;" /></td>
+                        <td><InputNumber @bind-Value="@document.Gross" style="width:120px;" /></td>
+                    </tr>
+                </Virtualize>
+
+                <!-- Without Virtualize Component: Slow -->
+                @*@foreach (var document in documents)
+                {
+                    <tr>
+                        <td><InputText @bind-Value="@document.FileName" style="width:100px" /></td>
+                        <td><InputDate @bind-Value="@document.Date" style="width:140px" /></td>
+                        <td>
+                            <InputSelect @bind-Value="@document.Type">
+                                @foreach(var type in (DocumentType[])Enum.GetValues(typeof(DocumentType)))
+                                {
+                                    <option value="@type">@type</option>
+                                }
+                            </InputSelect>
+                        </td>
+                        <td><InputText @bind-Value="@document.SupplierName" style="width:120px" /></td>
+                        <td><InputText @bind-Value="@document.SupplierCode" style="width:120px" /></td>
+                        <td><InputText @bind-Value="@document.OrderNumber" style="width:120px" /></td>
+                        <td>
+                            <InputSelect @bind-Value="@document.Currency">
+                                @foreach(var currency in (Currency[])Enum.GetValues(typeof(Currency)))
+                                {
+                                    <option value="@currency">@currency</option>
+                                }
+                            </InputSelect>
+                        </td>
+                        <td><InputNumber @bind-Value="@document.Net" style="width:50px" /></td>
+                        <td><InputNumber @bind-Value="@document.Tax" style="width:50px" /></td>
+                        <td><InputNumber @bind-Value="@document.Gross" style="width:50px" /></td>
+                    </tr>
+                }*@
+            </tbody>
+        </table>
+
+    </EditForm>
+}
+
+@code {
+    private Document[] documents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        documents = await DocumentService.GetDocumentsAsync();
+    }
+
+    private void HandleValidSubmit()
+    {
+        DocumentService.SubmitDocumentsAsync(documents);
+    }
+}
