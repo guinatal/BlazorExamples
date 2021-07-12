@@ -1,3 +1,8 @@
 ﻿h1 {
     color: purple;
 }
+
+/* it avoids horizontal scroll issues for the Virtualize Component */
+tbody > ::deep div {
+    display: table-row;
+}
